@@ -1,7 +1,58 @@
 {% extends "base.html" %}
 {% block title %}Profile{% endblock %}
 {% block content %}
-<h2>{{ user.name }}'s Profile</h2>
-<p><strong>Email:</strong> {{ user.email }}</p>
-<p>Manage your account settings and view your order history here (functionality to be added later).</p>
+<h2>Edit Profile</h2>
+<form method="POST">
+    <h3>Personal Details</h3>
+    <label>First Name:</label>
+    <input type="text" name="first_name" value="{{ user.first_name }}" required>
+
+    <label>Last Name:</label>
+    <input type="text" name="last_name" value="{{ user.last_name }}" required>
+
+    <label>Display Name (optional):</label>
+    <input type="text" name="display_name" value="{{ user.display_name }}">
+
+    <label>Date of Birth (YYYY-MM-DD):</label>
+    <input type="text" name="date_of_birth" value="{{ user.date_of_birth }}">
+
+    <h3>Contact Info</h3>
+    <label>Email:</label>
+    <input type="email" name="email" value="{{ user.email }}" required>
+
+    <label>Phone Number:</label>
+    <input type="text" name="phone_number" value="{{ user.phone_number }}" required>
+
+    <h3>Address</h3>
+    <label>Address Line 1:</label>
+    <input type="text" name="address_line1" value="{{ user.address_line1 }}" required>
+
+    <label>Address Line 2 (optional):</label>
+    <input type="text" name="address_line2" value="{{ user.address_line2 }}">
+
+    <label>City:</label>
+    <input type="text" name="city" value="{{ user.city }}" required>
+
+    <label>State:</label>
+    <input type="text" name="state" value="{{ user.state }}" required>
+
+    <label>Zip Code:</label>
+    <input type="text" name="zip_code" value="{{ user.zip_code }}" required>
+
+    <label>Country:</label>
+    <input type="text" name="country" value="{{ user.country }}" required>
+
+    <h3>Change Password</h3>
+    <p>Leave empty if you do not want to change your password.</p>
+    <label>Old Password:</label>
+    <input type="password" name="old_password">
+
+    <label>New Password:</label>
+    <input type="password" name="new_password">
+
+    <label>Confirm New Password:</label>
+    <input type="password" name="confirm_new_password">
+
+    <button type="submit" class="btn">Update Profile</button>
+</form>
 {% endblock %}

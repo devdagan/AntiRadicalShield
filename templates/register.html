@@ -1,14 +1,54 @@
 {% extends "base.html" %}
 {% block title %}Register{% endblock %}
 {% block content %}
-<h2>Create an Account</h2>
+<h2>Register</h2>
 <form method="POST">
-    <label>Full Name:</label>
-    <input type="text" name="name" required>
-    <label>Email:</label>
+    <h3>Personal Details</h3>
+    <label>First Name (required):</label>
+    <input type="text" name="first_name" required>
+
+    <label>Last Name (required):</label>
+    <input type="text" name="last_name" required>
+
+    <label>Display Name (optional):</label>
+    <input type="text" name="display_name">
+
+    <label>Date of Birth (YYYY-MM-DD, optional):</label>
+    <input type="text" name="date_of_birth" placeholder="YYYY-MM-DD">
+
+    <h3>Contact Info</h3>
+    <label>Email (required):</label>
     <input type="email" name="email" required>
-    <label>Password:</label>
+
+    <label>Phone Number (required):</label>
+    <input type="text" name="phone_number" required>
+
+    <h3>Address</h3>
+    <label>Address Line 1 (required):</label>
+    <input type="text" name="address_line1" required>
+
+    <label>Address Line 2 (optional):</label>
+    <input type="text" name="address_line2">
+
+    <label>City (required):</label>
+    <input type="text" name="city" required>
+
+    <label>State (required):</label>
+    <input type="text" name="state" required>
+
+    <label>Zip Code (required):</label>
+    <input type="text" name="zip_code" required>
+
+    <label>Country (required):</label>
+    <input type="text" name="country" required>
+
+    <h3>Account Security</h3>
+    <label>Password (required):</label>
     <input type="password" name="password" required>
+
+    <label>Confirm Password (required):</label>
+    <input type="password" name="confirm_password" required>
+
     <button type="submit" class="btn">Register</button>
 </form>
 <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
