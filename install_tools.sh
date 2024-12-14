@@ -1,68 +1,117 @@
 #!/bin/bash
 
-# Update system
-echo "Updating system..."
-sudo apt update && sudo apt upgrade -y
+set -euo pipefail
 
-# Install prerequisites
-echo "Installing prerequisites..."
-sudo apt install -y curl wget gnupg apt-transport-https software-properties-common lsb-release
+# =========================================
+# Configuration Variables
+# =========================================
+GIT_EMAIL="devdagan@gmail.com"
+GIT_USERNAME="devdagan@gmail.com"
+GRAFANA_VERSION="10.2.2"
 
-# Clean existing conflicting packages
-echo "Cleaning conflicting packages..."
-sudo apt remove -y docker docker-engine docker.io containerd runc
+# =========================================
+# Update and Upgrade the System
+# =========================================
+echo "Updating and upgrading system..."
+sudo apt-get update -y
+sudo apt-get upgrade -y
 
+# =========================================
+# Install General Prerequisites
+# =========================================
+echo "Installing general prerequisites..."
+sudo apt-get install -y \
+    curl \
+    wget \
+    gnupg \
+    apt-transport-https \
+    software-properties-common \
+    lsb-release \
+    ca-certificates \
+    tar \
+    dpkg
+
+# =========================================
+# Remove Conflicting Docker Packages
+# =========================================
+echo "Removing conflicting Docker packages..."
+sudo apt-get remove -y docker docker-engine docker.io containerd runc || true
+
+# =========================================
 # Install Docker
+# =========================================
 echo "Installing Docker..."
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io
+sudo rm -f /usr/share/keyrings/docker-archive-keyring.gpg
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor \
+    -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo \
+"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
+ https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update -y
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
 
-# Install Kubectl
-echo "Installing Kubectl..."
-curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/kubernetes-archive-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-sudo apt update && sudo apt install -y kubectl
+# =========================================
+# Install Kubectl (Direct Binary Installation)
+# =========================================
+echo "Installing Kubectl directly from the binary..."
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+rm kubectl
 
-# Install Node.js
+# =========================================
+# Install Node.js (v18.x)
+# =========================================
 echo "Installing Node.js..."
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install -y nodejs
+sudo apt-get install -y nodejs
 
+# =========================================
 # Install PostgreSQL
+# =========================================
 echo "Installing PostgreSQL..."
-sudo apt install -y postgresql postgresql-contrib
+sudo apt-get install -y postgresql postgresql-contrib
 
+# =========================================
 # Install Prometheus
+# =========================================
 echo "Installing Prometheus..."
 PROM_VERSION="2.45.0"
-wget https://github.com/prometheus/prometheus/releases/download/v$PROM_VERSION/prometheus-$PROM_VERSION.linux-amd64.tar.gz
-tar -xvf prometheus-$PROM_VERSION.linux-amd64.tar.gz
-sudo mv prometheus-$PROM_VERSION.linux-amd64/prometheus /usr/local/bin/
-sudo mv prometheus-$PROM_VERSION.linux-amd64/promtool /usr/local/bin/
+wget https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz
+tar -xvf prometheus-${PROM_VERSION}.linux-amd64.tar.gz
+sudo mv prometheus-${PROM_VERSION}.linux-amd64/prometheus /usr/local/bin/
+sudo mv prometheus-${PROM_VERSION}.linux-amd64/promtool /usr/local/bin/
 sudo mkdir -p /etc/prometheus
-sudo mv prometheus-$PROM_VERSION.linux-amd64/prometheus.yml /etc/prometheus/prometheus.yml
-sudo rm -rf prometheus-$PROM_VERSION.linux-amd64 prometheus-$PROM_VERSION.linux-amd64.tar.gz
+sudo mv prometheus-${PROM_VERSION}.linux-amd64/prometheus.yml /etc/prometheus/prometheus.yml
+sudo rm -rf prometheus-${PROM_VERSION}.linux-amd64 prometheus-${PROM_VERSION}.linux-amd64.tar.gz
 
-# Install Grafana
-echo "Installing Grafana..."
-GRAFANA_VERSION="9.5.3"
-wget https://dl.grafana.com/oss/release/grafana-$GRAFANA_VERSION_amd64.deb
-sudo dpkg -i grafana-$GRAFANA_VERSION_amd64.deb
-sudo systemctl enable --now grafana-server
-sudo rm grafana-$GRAFANA_VERSION_amd64.deb
+# =========================================
+# Install Grafana (From Binary Tarball)
+# =========================================
+echo "Installing Grafana from binary..."
+sudo apt-get install -y adduser libfontconfig1 musl
+wget https://dl.grafana.com/enterprise/release/grafana-enterprise_11.4.0_amd64.deb
+sudo dpkg -i grafana-enterprise_11.4.0_amd64.deb
 
+# =========================================
 # Install Git
+# =========================================
 echo "Installing Git..."
-sudo apt install -y git
+sudo apt-get install -y git
 
+# =========================================
 # Configure Git
+# =========================================
 echo "Configuring Git..."
-read -p "Please enter your GitHub email: " GIT_EMAIL
-read -p "Please enter your GitHub username: " GIT_USERNAME
 git config --global user.email "$GIT_EMAIL"
 git config --global user.name "$GIT_USERNAME"
 
-echo "All tools installed and configured! Please restart your terminal or system for changes to take effect."
+# =========================================
+# Final Message
+# =========================================
+echo "All tools installed and configured!"
+echo "Please log out and log back in (or restart) for Docker group changes to take effect."
