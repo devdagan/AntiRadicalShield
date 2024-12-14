@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<h2>Checkout</h2>
+<table class="cart-table">
+    <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+    </tr>
+    {% for item in items %}
+    <tr>
+        <td>{{ item.product.name }} - ${{ "%.2f"|format(item.product.price) }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>${{ "%.2f"|format(item.subtotal) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<div class="cart-total">
+    <h3>Total: ${{ "%.2f"|format(total) }}</h3>
+</div>
+<form method="POST">
+    <button type="submit" class="btn">Place Order</button>
+</form>
+{% endblock %}

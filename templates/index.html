@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<div class="hero-section">
+    <h1>Protect & Renew Your Skin</h1>
+    <p>Advanced anti-aging solutions designed to shield your skin from environmental damage, restore elasticity, and reveal a healthier, more youthful glow.</p>
+    <a class="btn" href="{{ url_for('product_list') }}">Shop Now</a>
+</div>
+
+<div class="featured-products">
+    <h2>Featured Products</h2>
+    <div class="product-grid">
+        {% for product in products[:4] %}
+        <div class="product-card">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}">
+            <h3>{{ product.name }}</h3>
+            <p>${{ product.price }}</p>
+            <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn">View Details</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

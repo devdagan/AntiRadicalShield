@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+
+<h2>Our Anti-Aging Collection</h2>
+<p>Explore our expertly formulated products designed to combat the effects of aging. Each product is infused with potent antioxidants, nourishing ingredients, and cutting-edge technology.</p>
+
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+        <h3>{{ product.name }}</h3>
+        <p>${{ product.price }}</p>
+        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn">View Details</a>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
