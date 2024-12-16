@@ -1,50 +1,34 @@
+# app.py
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
-from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
 from config import SQLALCHEMY_DATABASE_URI, SECRET_KEY, SQLALCHEMY_TRACK_MODIFICATIONS
+from extensions import db, bcrypt, login_manager, migrate
+from models import User, Product, Order, OrderItem
+from flask_login import LoginManager, login_user, current_user, logout_user, login_required
+from api import api_bp  # Import after initializing extensions
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
-login_manager = LoginManager(app)
+# Initialize extensions
+db.init_app(app)
+bcrypt.init_app(app)
+login_manager.init_app(app)
+migrate.init_app(app, db)  # Initialize Flask-Migrate
 login_manager.login_view = 'login'
 
+# Register the API blueprint
+app.register_blueprint(api_bp)
 
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
-    first_name = db.Column(db.String(150), nullable=False)
-    last_name = db.Column(db.String(150), nullable=False)
-    display_name = db.Column(db.String(150), nullable=True)
-    date_of_birth = db.Column(db.String(10), nullable=True)  # Format: YYYY-MM-DD
-    address_line1 = db.Column(db.String(255), nullable=False)
-    address_line2 = db.Column(db.String(255), nullable=True)
-    city = db.Column(db.String(100), nullable=False)
-    state = db.Column(db.String(100), nullable=False)
-    zip_code = db.Column(db.String(20), nullable=False)
-    country = db.Column(db.String(100), nullable=False)
-    phone_number = db.Column(db.String(20), nullable=False)
-
-
-class Product(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    image_url = db.Column(db.String(255), nullable=False)
-
-
+# User loader for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+# Routes
 @app.route('/')
 def home():
     products = Product.query.all()

@@ -3,18 +3,27 @@
 import sys
 import os
 
-# Add the parent directory to sys.path
+# Add the parent directory to sys.path to allow imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app import app
 from extensions import db
 from models import User
 
-with app.app_context():
-    user = User.query.filter_by(email="devijino8@gmail.com").first()
-    if user:
-        user.role = "admin"
-        db.session.commit()
-        print(f"User {user.email} has been promoted to admin.")
+def set_admin(email):
+    with app.app_context():
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.role = "admin"
+            db.session.commit()
+            print(f"User {user.email} has been promoted to admin.")
+        else:
+            print(f"User with email '{email}' not found.")
+
+if __name__ == "__main__":
+    # You can pass the email as a command-line argument
+    if len(sys.argv) != 2:
+        print("Usage: python3 set_admin.py <email>")
     else:
-        print("User with email 'devijino8@gmail.com' not found.")
+        email = sys.argv[1]
+        set_admin(email)
