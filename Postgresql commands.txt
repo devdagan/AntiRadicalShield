@@ -1,0 +1,68 @@
+(venv) yossi@Ubuntu:~/Desktop/antiradicalshield$ sudo apt update
+sudo apt install postgresql postgresql-contrib
+pip install psycopg2-binary
+pip install Flask-Migrate
+sudo -u postgres psql
+
+postgres=# CREATE DATABASE antiradicalshield_db;
+CREATE DATABASE
+postgres=# CREATE USER admin WITH PASSWORD '123456';
+CREATE ROLE
+postgres=# GRANT ALL PRIVILEGES ON DATABASE antiradicalshield_db TO admin;
+GRANT
+postgres=# \q
+
+flask db init
+pip install python-dotenv
+
+#####Giving admin user the permissions to log in with password####
+sudo nano /etc/postgresql/16/main/pg_hba.conf
+
+###################Nano adding in the top of the file########################
+# Allow admin user to connect with password
+host    all             admin           127.0.0.1/32            md5
+host    all             admin           ::1/128                 md5
+#############################################################################
+
+sudo service postgresql reload
+sudo service postgresql restart
+sudo -u postgres psql
+
+postgres=# ALTER USER admin WITH PASSWORD '123456';
+ALTER ROLE
+postgres=# \c antiradicalshield_db
+\dt
+You are now connected to database "antiradicalshield_db" as user "postgres".
+Did not find any relations.
+antiradicalshield_db=# \q
+
+echo ".env" >> .gitignore
+flask shell
+
+>>> from config import SQLALCHEMY_DATABASE_URI
+>>> print(SQLALCHEMY_DATABASE_URI)
+postgresql://admin:123456@localhost:5432/antiradicalshield_db
+>>> 
+>>> exit()
+
+sudo -u postgres psql
+
+postgres=# GRANT USAGE, CREATE ON SCHEMA public TO admin;
+postgres=# GRANT ALL PRIVILEGES ON SCHEMA public TO admin;
+GRANT
+postgres=# ALTER SCHEMA public OWNER TO admin;
+ALTER SCHEMA
+postgres=# \q
+
+sudo -u postgres psql -d antiradicalshield_db
+
+antiradicalshield_db=# ALTER SCHEMA public OWNER TO admin;
+ALTER SCHEMA
+antiradicalshield_db=# GRANT USAGE, CREATE ON SCHEMA public TO admin;
+GRANT
+antiradicalshield_db=# \q
+
+flask db migrate -m "Initial migration with PostgreSQL schema."
+flask db upgrade
+
+
